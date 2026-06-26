@@ -603,8 +603,7 @@
     const ip = document.getElementById('ipInput').value.trim();
     if (!ip || ip === 'Detecting...') { showError('Please enter or auto-detect an IP address.'); return; }
 
-    // Validate
-    if (!isValidIP(ip) && ip !== 'Detecting...') {
+    if (!isValidIP(ip)) {
       showError('Invalid IP address format!');
       return;
     }
@@ -614,18 +613,18 @@
     document.getElementById('loadingBox').style.display = 'block';
 
     try {
-      const res = await fetch(`https://ipapi.co/${ip}/json/`);
+      // ip-api.com — CORS friendly, free, no key needed
+      const res = await fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,city,isp,org,as,proxy,hosting,timezone,query`);
       const d = await res.json();
 
-      if (d.error) throw new Error(d.reason || 'Lookup failed');
+      if (d.status === 'fail') throw new Error(d.message || 'Lookup failed');
 
       // Fill info
-      document.getElementById('r-ip').textContent = d.ip || ip;
-      document.getElementById('r-loc').textContent = `${d.city || '?'}, ${d.country_name || '?'}`;
-      document.getElementById('r-isp').textContent = d.org || d.asn || 'Unknown';
+      document.getElementById('r-ip').textContent = d.query || ip;
+      document.getElementById('r-loc').textContent = `${d.city || '?'}, ${d.country || '?'}`;
+      document.getElementById('r-isp').textContent = d.isp || d.org || 'Unknown';
       document.getElementById('r-tz').textContent = d.timezone || 'Unknown';
 
-      // Determine type
       const isPrivate = isPrivateIP(ip);
       const isProxy = d.proxy || false;
       const isHosting = d.hosting || false;
@@ -637,12 +636,9 @@
 
       document.getElementById('r-type').textContent = ipType;
 
-      // Status
-      let blocked = isProxy || isHosting || false;
-      // Simulate block detection based on ASN patterns
       const suspectOrgs = ['cloud', 'hosting', 'vpn', 'proxy', 'datacenter', 'server'];
-      const orgLower = (d.org || '').toLowerCase();
-      blocked = blocked || suspectOrgs.some(k => orgLower.includes(k));
+      const orgLower = (d.org || d.isp || '').toLowerCase();
+      const blocked = !isPrivate && (isProxy || isHosting || suspectOrgs.some(k => orgLower.includes(k)));
 
       const statusBox = document.getElementById('statusBox');
       if (isPrivate) {
