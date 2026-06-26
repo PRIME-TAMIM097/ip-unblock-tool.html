@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP UNBLOCK TOOL — TAMIM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+  :root {
+    --cyan: #00f5ff;
+    --pink: #ff2d78;
+    --purple: #b44dff;
+    --dark: #050810;
+    --darker: #020508;
+    --card: #0a0f1e;
+    --border: rgba(0,245,255,0.2);
+    --glow-cyan: 0 0 20px rgba(0,245,255,0.5);
+    --glow-pink: 0 0 20px rgba(255,45,120,0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--darker);
+    color: #c8d8ff;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.15) 3px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Grid bg */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 20px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 40px 0 30px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+
+  .logo-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--pink);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 6vw, 42px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    text-shadow: none;
+    filter: drop-shadow(0 0 15px rgba(0,245,255,0.4));
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(180,200,255,0.5);
+    letter-spacing: 3px;
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent);
+  }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* Input group */
+  .input-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ip-input {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(0,245,255,0.05);
+    border: 1px solid rgba(0,245,255,0.3);
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: var(--cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s;
+    letter-spacing: 2px;
+  }
+
+  .ip-input::placeholder { color: rgba(0,245,255,0.25); }
+
+  .ip-input:focus {
+    border-color: var(--cyan);
+    box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0,245,255,0.05);
+  }
+
+  .btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: var(--darker);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255,45,120,0.4);
+    color: var(--pink);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255,45,120,0.1);
+    border-color: var(--pink);
+    box-shadow: var(--glow-pink);
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  /* Auto detect */
+  .auto-detect {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(180,200,255,0.5);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .auto-detect button {
+    background: none;
+    border: none;
+    color: var(--purple);
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    text-decoration: underline;
+    padding: 0;
+  }
+
+  .auto-detect button:hover { color: var(--cyan); }
+
+  /* Results */
+  #results { display: none; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 500px) { .result-grid { grid-template-columns: 1fr; } }
+
+  .result-item {
+    background: rgba(0,245,255,0.03);
+    border: 1px solid rgba(0,245,255,0.1);
+    border-radius: 6px;
+    padding: 14px;
+  }
+
+  .result-label {
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .result-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px;
+    color: var(--cyan);
+  }
+
+  /* Status badge */
+  .status-box {
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .status-blocked {
+    background: rgba(255,45,120,0.08);
+    border: 1px solid rgba(255,45,120,0.3);
+  }
+
+  .status-clean {
+    background: rgba(0,245,255,0.06);
+    border: 1px solid rgba(0,245,255,0.25);
+  }
+
+  .status-icon { font-size: 28px; }
+
+  .status-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .status-blocked .status-title { color: var(--pink); }
+  .status-clean .status-title { color: var(--cyan); }
+
+  .status-desc {
+    font-size: 13px;
+    color: rgba(180,200,255,0.6);
+  }
+
+  /* Steps */
+  .steps { margin-top: 6px; }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,245,255,0.06);
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-content h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: #d0e0ff;
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    font-size: 13px;
+    color: rgba(150,170,220,0.7);
+    line-height: 1.5;
+  }
+
+  .step-content code {
+    background: rgba(0,245,255,0.1);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 30px;
+    display: none;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(0,245,255,0.1);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    animation: blink 1s infinite;
+  }
+
+  /* VPN List */
+  .vpn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .vpn-item {
+    background: rgba(180,77,255,0.06);
+    border: 1px solid rgba(180,77,255,0.2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--purple);
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .vpn-item:hover {
+    border-color: var(--purple);
+    background: rgba(180,77,255,0.12);
+    box-shadow: 0 0 12px rgba(180,77,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  /* Footer sig */
+  footer {
+    text-align: center;
+    padding: 30px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+
+  .sig {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: rgba(0,245,255,0.4);
+    letter-spacing: 2px;
+  }
+
+  .sig span { color: var(--pink); }
+
+  /* Pulse dot */
+  .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    margin-right: 6px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,245,255,0.6); }
+    50% { box-shadow: 0 0 0 6px rgba(0,245,255,0); }
+  }
+
+  .error-msg {
+    background: rgba(255,45,120,0.08);
+    border: 1px solid rgba(255,45,120,0.3);
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: var(--pink);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    display: none;
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-tag">⟨ SYSTEM TOOL v2.0 ⟩</div>
+    <h1>IP UNBLOCK TOOL</h1>
+    <div class="subtitle">// ANALYZE · DIAGNOSE · UNBLOCK //</div>
+  </header>
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="card-title">⬡ Enter Target IP</div>
+    <div class="input-group">
+      <input class="ip-input" type="text" id="ipInput" placeholder="192.168.x.x or auto-detect" maxlength="45" />
+      <button class="btn btn-primary" onclick="analyzeIP()">ANALYZE</button>
+      <button class="btn btn-secondary" onclick="clearAll()">RESET</button>
+    </div>
+    <div class="auto-detect">
+      <span class="pulse-dot"></span>
+      <span>Don't know your IP?</span>
+      <button onclick="autoDetect()">Auto-Detect My IP</button>
+    </div>
+    <div class="error-msg" id="errorMsg">⚠ Invalid IP address format!</div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loadingBox">
+    <div class="spinner"></div>
+    <p>SCANNING IP ADDRESS...</p>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- IP Info Card -->
+    <div class="card">
+      <div class="card-title">⬡ IP Information</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-label">IP ADDRESS</div>
+          <div class="result-value" id="r-ip">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">LOCATION</div>
+          <div class="result-value" id="r-loc">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">ISP / ORG</div>
+          <div class="result-value" id="r-isp" style="font-size:13px">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">IP TYPE</div>
+          <div class="result-value" id="r-type">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">TIMEZONE</div>
+          <div class="result-value" id="r-tz" style="font-size:13px">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">STATUS</div>
+          <div class="result-value" id="r-status">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="card">
+      <div class="card-title">⬡ Block Status</div>
+      <div class="status-box" id="statusBox">
+        <div class="status-icon" id="statusIcon">🔍</div>
+        <div>
+          <div class="status-title" id="statusTitle">Analyzing...</div>
+          <div class="status-desc" id="statusDesc">Please wait...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unblock Steps -->
+    <div class="card" id="stepsCard">
+      <div class="card-title">⬡ Unblock Steps</div>
+      <div class="steps" id="stepsContent"></div>
+    </div>
+
+    <!-- VPN Recommendations -->
+    <div class="card">
+      <div class="card-title">⬡ Recommended VPN / Proxy Tools</div>
+      <div class="vpn-grid">
+        <div class="vpn-item" onclick="openLink('https://protonvpn.com')">ProtonVPN<br><span style="font-size:10px;color:#666">FREE</span></div>
+        <div class="vpn-item" onclick="openLink('https://windscribe.com')">Windscribe<br><span style="font-size:10px;color:#666">FREE</span></div>
+        <div class="vpn-item" onclick="openLink('https://www.tunnelbear.com')">TunnelBear<br><span style="font-size:10px;color:#666">FREE</span></div>
+        <div class="vpn-item" onclick="openLink('https://www.expressvpn.com')">ExpressVPN<br><span style="font-size:10px;color:#666">PAID</span></div>
+        <div class="vpn-item" onclick="openLink('https://nordvpn.com')">NordVPN<br><span style="font-size:10px;color:#666">PAID</span></div>
+        <div class="vpn-item" onclick="openLink('https://tor.eff.org')">Tor Browser<br><span style="font-size:10px;color:#666">FREE</span></div>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+
+  <footer>
+    <div class="sig">♡—͟͞͞ <span>𝐓𝐀𝐌𝐈𝐌</span> ⸙ · IP UNBLOCK TOOL · 2025</div>
+  </footer>
+
+</div>
+
+<script>
+  function isValidIP(ip) {
+    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const ipv6 = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    if (ipv4.test(ip)) {
+      return ip.split('.').every(n => parseInt(n) <= 255);
+    }
+    return ipv6.test(ip) || ip.includes(':');
+  }
+
+  async function autoDetect() {
+    document.getElementById('ipInput').value = 'Detecting...';
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      document.getElementById('ipInput').value = data.ip;
+    } catch {
+      document.getElementById('ipInput').value = '';
+      showError('Could not auto-detect IP. Try manually.');
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+
+  function clearAll() {
+    document.getElementById('ipInput').value = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+
+  function openLink(url) {
+    window.open(url, '_blank');
+  }
+
+  async function analyzeIP() {
+    const ip = document.getElementById('ipInput').value.trim();
+    if (!ip || ip === 'Detecting...') { showError('Please enter or auto-detect an IP address.'); return; }
+
+    // Validate
+    if (!isValidIP(ip) && ip !== 'Detecting...') {
+      showError('Invalid IP address format!');
+      return;
+    }
+
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('loadingBox').style.display = 'block';
+
+    try {
+      const res = await fetch(`https://ipapi.co/${ip}/json/`);
+      const d = await res.json();
+
+      if (d.error) throw new Error(d.reason || 'Lookup failed');
+
+      // Fill info
+      document.getElementById('r-ip').textContent = d.ip || ip;
+      document.getElementById('r-loc').textContent = `${d.city || '?'}, ${d.country_name || '?'}`;
+      document.getElementById('r-isp').textContent = d.org || d.asn || 'Unknown';
+      document.getElementById('r-tz').textContent = d.timezone || 'Unknown';
+
+      // Determine type
+      const isPrivate = isPrivateIP(ip);
+      const isProxy = d.proxy || false;
+      const isHosting = d.hosting || false;
+
+      let ipType = 'Public IP';
+      if (isPrivate) ipType = '🔒 Private IP';
+      else if (isProxy) ipType = '⚡ Proxy/VPN IP';
+      else if (isHosting) ipType = '🖥 Hosting/Server IP';
+
+      document.getElementById('r-type').textContent = ipType;
+
+      // Status
+      let blocked = isProxy || isHosting || false;
+      // Simulate block detection based on ASN patterns
+      const suspectOrgs = ['cloud', 'hosting', 'vpn', 'proxy', 'datacenter', 'server'];
+      const orgLower = (d.org || '').toLowerCase();
+      blocked = blocked || suspectOrgs.some(k => orgLower.includes(k));
+
+      const statusBox = document.getElementById('statusBox');
+      if (isPrivate) {
+        document.getElementById('r-status').textContent = '🔐 Private';
+        statusBox.className = 'status-box status-clean';
+        document.getElementById('statusIcon').textContent = '🔐';
+        document.getElementById('statusTitle').textContent = 'PRIVATE IP DETECTED';
+        document.getElementById('statusDesc').textContent = 'This is a local/private IP address. It cannot be blocked externally.';
+        setSteps('private');
+      } else if (blocked) {
+        document.getElementById('r-status').innerHTML = '<span style="color:var(--pink)">⚠ FLAGGED</span>';
+        statusBox.className = 'status-box status-blocked';
+        document.getElementById('statusIcon').textContent = '🚫';
+        document.getElementById('statusTitle').textContent = 'IP MAY BE BLOCKED';
+        document.getElementById('statusDesc').textContent = 'This IP shows signs of being flagged, proxied, or hosted. Some services may block it.';
+        setSteps('blocked');
+      } else {
+        document.getElementById('r-status').innerHTML = '<span style="color:var(--cyan)">✔ CLEAN</span>';
+        statusBox.className = 'status-box status-clean';
+        document.getElementById('statusIcon').textContent = '✅';
+        document.getElementById('statusTitle').textContent = 'IP APPEARS CLEAN';
+        document.getElementById('statusDesc').textContent = 'No major blocks detected. If you still face issues, try the steps below.';
+        setSteps('clean');
+      }
+
+    } catch (err) {
+      showError('Lookup failed: ' + err.message);
+    } finally {
+      document.getElementById('loadingBox').style.display = 'none';
+      document.getElementById('results').style.display = 'block';
+    }
+  }
+
+  function isPrivateIP(ip) {
+    return ip.startsWith('10.') || ip.startsWith('192.168.') ||
+           ip.startsWith('172.16.') || ip === '127.0.0.1' ||
+           ip.startsWith('169.254.');
+  }
+
+  function setSteps(type) {
+    const container = document.getElementById('stepsContent');
+    let steps = [];
+
+    if (type === 'private') {
+      steps = [
+        { title: 'Use Your Public IP Instead', body: 'Private IPs (192.168.x.x, 10.x.x.x) work only inside your local network. Check your public IP at <code>whatismyip.com</code>' },
+        { title: 'Check Router Settings', body: 'If you face network issues, restart your router or contact your ISP.' },
+        { title: 'Use Mobile Data', body: 'Switch to mobile data to get a fresh public IP from your carrier.' },
+      ];
+    } else if (type === 'blocked') {
+      steps = [
+        { title: 'Use a VPN Service', body: 'Connect to a trusted VPN (ProtonVPN, NordVPN) to get a new clean IP address. Choose a server in your target region.' },
+        { title: 'Request IP Change from ISP', body: 'Contact your Internet Service Provider and request a new dynamic IP. Most ISPs can do this easily.' },
+        { title: 'Use Tor Browser', body: 'Route your traffic through Tor to anonymize and change your visible IP completely. Free and reliable.' },
+        { title: 'Clear DNS Cache', body: 'Run <code>ipconfig /flushdns</code> (Windows) or <code>sudo dscacheutil -flushcache</code> (Mac) to clear local cache.' },
+        { title: 'Contact Site Admin', body: 'If a specific website blocked your IP, contact their support team with your IP and request removal from their blocklist.' },
+        { title: 'Use Proxy Browser Extensions', body: 'Install browser extensions like Hola, Browsec, or ZenMate to bypass IP blocks quickly.' },
+      ];
+    } else {
+      steps = [
+        { title: 'Check if Specific Site is Down', body: 'Visit <code>downforeveryoneorjustme.com</code> to verify the site isn\'t just down globally.' },
+        { title: 'Flush DNS Cache', body: 'Run <code>ipconfig /flushdns</code> on Windows or <code>sudo dscacheutil -flushcache</code> on Mac to refresh DNS.' },
+        { title: 'Try Different DNS Servers', body: 'Switch to Google DNS <code>8.8.8.8</code> or Cloudflare DNS <code>1.1.1.1</code> in your network settings.' },
+        { title: 'Disable Firewall Temporarily', body: 'Check if your firewall or antivirus is blocking connections. Temporarily disable to test.' },
+        { title: 'Use VPN as Precaution', body: 'Even with a clean IP, a VPN can help bypass geo-restrictions or temporary blocks.' },
+      ];
+    }
+
+    container.innerHTML = steps.map((s, i) => `
+      <div class="step">
+        <div class="step-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="step-content">
+          <h4>${s.title}</h4>
+          <p>${s.body}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Enter key support
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ipInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyzeIP();
+    });
+  });
+</script>
+</body>
+</html>
